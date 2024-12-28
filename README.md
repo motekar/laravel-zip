@@ -13,21 +13,16 @@ However, as long as security fixes will come in I see it as my basic obligation 
 
 # Zipper
 
-[![Build Status](https://travis-ci.org/Chumper/Zipper.png)](https://travis-ci.org/Chumper/Zipper)
+[![Build Status](https://travis-ci.org/motekar/laravel-zipper.png)](https://travis-ci.org/motekar/laravel-zipper)
 
 This is a simple Wrapper around the ZipArchive methods with some handy functions.
 
 ## Installation
 
 1. Add this package to the list of required packages, inside `composer.json`
-  * for Laravel 5: `"chumper/zipper": "1.0.x"`
-  * ~~for Laravel 4: `"chumper/zipper": "0.5.x"`~~
+  * `"motekar/zipper": "1.0.x"`
+
 2. Run `composer update`
-
-3. Go to `app/config/app.php`
-
-  * add to providers `Chumper\Zipper\ZipperServiceProvider::class`
-  * add to aliases `'Zipper' => Chumper\Zipper\Zipper::class`
 
 You can now access Zipper with the `Zipper` alias.
 
@@ -40,7 +35,7 @@ Zipper::make('public/test.zip')->add($files)->close();
 
 ## Another example
 ```php
-$zipper = new \Chumper\Zipper\Zipper;
+$zipper = new \Motekar\Zipper\Zipper;
 
 $zipper->make('test.zip')->folder('test')->add('composer.json');
 $zipper->zip('test.zip')->folder('test')->add('composer.json','test');
@@ -102,7 +97,7 @@ Zipper::make('test.zip')->folder('test')->remove('composer.json');
 
 ## listFiles($regexFilter = null)
 
-Lists all files within archive (if no filter pattern is provided). Use `$regexFilter` parameter to filter files. See [Pattern Syntax](http://php.net/manual/en/reference.pcre.pattern.syntax.php) for regular expression syntax 
+Lists all files within archive (if no filter pattern is provided). Use `$regexFilter` parameter to filter files. See [Pattern Syntax](http://php.net/manual/en/reference.pcre.pattern.syntax.php) for regular expression syntax
 
 > NB: `listFiles` ignores folder set with `folder` function
 
@@ -110,8 +105,8 @@ Lists all files within archive (if no filter pattern is provided). Use `$regexFi
 Example: Return all files/folders ending/not ending with '.log' pattern (case insensitive). This will return matches in sub folders and their sub folders also
 
 ```php
-$logFiles = Zipper::make('test.zip')->listFiles('/\.log$/i'); 
-$notLogFiles = Zipper::make('test.zip')->listFiles('/^(?!.*\.log).*$/i'); 
+$logFiles = Zipper::make('test.zip')->listFiles('/\.log$/i');
+$notLogFiles = Zipper::make('test.zip')->listFiles('/^(?!.*\.log).*$/i');
 ```
 
 
@@ -151,7 +146,7 @@ This will go into the folder `test` in the zip file and extract the content of t
 
 This command is really nice to get just a part of the zip file, you can also pass a 2nd & 3rd param to specify a single or an array of files that will be
 
-> NB: Php ZipArchive uses internally '/' as directory separator for files/folders in zip. So Windows users should not set 
+> NB: Php ZipArchive uses internally '/' as directory separator for files/folders in zip. So Windows users should not set
 > whitelist/blacklist patterns with '\' as it will not match anything
 
 white listed
@@ -186,7 +181,7 @@ Which will extract the `test.zip` into the `public` folder but **only** files/fo
  * extract file or folder named `composer` in folder named `vendor` inside zip to `public` resulting `public/composer`
  * extract file or folder named `bin/phpunit` in `vendor/bin/phpunit` folder inside zip to `public` resulting `public/bin/phpunit`
 
-> **NB:** extracting files/folder from zip without setting Zipper::EXACT_MATCH 
+> **NB:** extracting files/folder from zip without setting Zipper::EXACT_MATCH
 > When zip has similar structure as below and only `test.bat` is given as whitelist/blacklist argument then `extractTo` would extract all those files and folders as they all start with given string
 
 ```
@@ -203,12 +198,12 @@ Extracts the content of the zip archive matching regular expression to the speci
 
 Example: extract all files ending with `.php` from `src` folder and its sub folders.
 ```php
-Zipper::make('test.zip')->folder('src')->extractMatchingRegex($path, '/\.php$/i'); 
+Zipper::make('test.zip')->folder('src')->extractMatchingRegex($path, '/\.php$/i');
 ```
 
 Example: extract all files **except** those ending with `test.php` from `src` folder and its sub folders.
 ```php
-Zipper::make('test.zip')->folder('src')->extractMatchingRegex($path, '/^(?!.*test\.php).*$/i'); 
+Zipper::make('test.zip')->folder('src')->extractMatchingRegex($path, '/^(?!.*test\.php).*$/i');
 ```
 
 # Development

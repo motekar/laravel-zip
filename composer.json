@@ -1,9 +1,13 @@
 {
-    "name": "chumper/zipper",
+    "name": "motekar/laravel-zip",
     "type": "library",
     "description": "This is a little neat helper for the ZipArchive methods with handy functions",
-    "keywords": ["laravel", "ZIP", "Archive"],
-    "homepage": "http://github.com/Chumper/zipper",
+    "keywords": [
+        "laravel",
+        "ZIP",
+        "Archive"
+    ],
+    "homepage": "http://github.com/motekar/laravel-zip",
     "license": "Apache2",
     "authors": [
         {
@@ -11,38 +15,60 @@
             "email": "github@nilsplaschke.de",
             "homepage": "http://nilsplaschke.de",
             "role": "Developer"
+        },
+        {
+            "name": "Fauzie Rofi",
+            "email": "fauzie811@yahoo.com",
+            "role": "Developer"
         }
     ],
     "require": {
-        "php": ">=5.6.0",
+        "php": "^8.0",
         "ext-zip": "*",
-        "illuminate/support": "^5.0",
-        "illuminate/filesystem": "^5.0"
+        "illuminate/filesystem": "^10.0|^11.0",
+        "illuminate/support": "^10.0|^11.0",
+        "spatie/laravel-package-tools": "^1.17",
+        "spatie/temporary-directory": "^2.2"
     },
     "require-dev": {
-        "phpunit/phpunit": "^5.7",
-        "mockery/mockery": "^0.9.4"
+        "laravel/pint": "^1.18",
+        "mockery/mockery": "^1.5.1",
+        "orchestra/testbench": "^8.18",
+        "pestphp/pest": "^2.3",
+        "pestphp/pest-plugin-laravel": "^2.2",
+        "spatie/pest-expectations": "^1.5"
     },
     "autoload": {
         "psr-4": {
-            "Chumper\\Zipper\\": "src/Chumper/Zipper"
-        }
+            "Motekar\\LaravelZip\\": "src/"
+        },
+        "files": [
+            "src/Support/functions.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
-            "Chumper\\Zipper\\": "tests/"
+            "Motekar\\LaravelZip\\Tests\\": "tests/"
         }
     },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "format": "vendor/bin/pint"
+    },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Chumper\\Zipper\\ZipperServiceProvider"
+                "Motekar\\LaravelZip\\ZipServiceProvider"
             ],
             "aliases": {
-                "Zipper": "Chumper\\Zipper\\Zipper"
+                "LaravelZip": "Zip"
             }
         }
     },
