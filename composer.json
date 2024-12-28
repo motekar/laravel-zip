@@ -8,7 +8,7 @@
         "Archive"
     ],
     "homepage": "http://github.com/motekar/laravel-zip",
-    "license": "Apache2",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Nils Plaschke",
