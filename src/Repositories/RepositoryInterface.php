@@ -11,75 +11,65 @@ interface RepositoryInterface
 {
     /**
      * Construct with a given path
-     *
-     * @param  bool  $new
      */
-    public function __construct($filePath, $new = false, $archiveImplementation = null);
+    public function __construct(string $filePath, bool $create = false, ?object $archiveImpl = null);
 
     /**
      * Add a file to the opened Archive
      */
-    public function addFile($pathToFile, $pathInArchive);
+    public function addFile(string $pathToFile, string $pathInArchive);
 
     /**
      * Add a file to the opened Archive using its contents
      */
-    public function addFromString($name, $content);
+    public function addFromString(string $name, string $content);
 
     /**
      * Add an empty directory
      */
-    public function addEmptyDir($dirName);
+    public function addEmptyDir(string $dirName);
 
     /**
      * Remove a file permanently from the Archive
      */
-    public function removeFile($pathInArchive);
+    public function removeFile(string $pathInArchive);
 
     /**
      * Get the content of a file
-     *
-     *
-     * @return string
      */
-    public function getFileContent($pathInArchive);
+    public function getFileContent(string $pathInArchive): string;
 
     /**
      * Get the stream of a file
-     *
-     *
-     * @return mixed
      */
-    public function getFileStream($pathInArchive);
+    public function getFileStream(string $pathInArchive): mixed;
 
     /**
      * Will loop over every item in the archive and will execute the callback on them
      * Will provide the filename for every item
      */
-    public function each($callback);
+    public function each(callable $callback);
 
     /**
      * Checks whether the file is in the archive
-     *
-     *
-     * @return bool
      */
-    public function fileExists($fileInArchive);
+    public function fileExists(string $fileInArchive): bool;
 
     /**
      * Sets the password to be used for decompressing
-     *
-     *
-     * @return bool
+     * function named usePassword for clarity
      */
-    public function usePassword($password);
+    public function usePassword(string $password): bool;
 
     /**
      * Returns the status of the archive as a string
-     *
-     * @return string
      */
-    public function getStatus();
+    public function getStatus(): string;
+
+    /**
+     * Saves the archive
+     */
+    public function save();
 
     /**
      * Closes the archive and saves it

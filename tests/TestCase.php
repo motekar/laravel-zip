@@ -2,10 +2,15 @@
 
 namespace Motekar\LaravelZip\Tests;
 
-use Orchestra\Testbench\Concerns\WithWorkbench;
+use Motekar\LaravelZip\ZipServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {
-    // use WithWorkbench;
+    protected function getPackageProviders($app)
+    {
+        return [
+            ZipServiceProvider::class,
+        ];
+    }
 }

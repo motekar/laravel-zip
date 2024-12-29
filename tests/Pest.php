@@ -16,14 +16,12 @@ uses(TestCase::class)
     })
     ->in(__DIR__);
 
-registerSpatiePestHelpers();
-
 function getTestSupportPath($suffix = ''): string
 {
-    return __DIR__."/TestSupport/{$suffix}";
+    return __DIR__ . "/TestSupport/{$suffix}";
 }
 
 function getTempPath($suffix = ''): string
 {
-    return getTestSupportPath('temp/'.$suffix);
+    return getTestSupportPath('temp/' . $suffix);
 }
