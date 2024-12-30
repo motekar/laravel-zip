@@ -9,7 +9,7 @@ use Motekar\LaravelZip\Repositories\RepositoryInterface;
 /**
  * This class is a wrapper around the ZipArchive methods with some handy functions
  */
-class ZipBuilder
+class ZipManager
 {
     /**
      * Constant for extracting

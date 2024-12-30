@@ -2,9 +2,9 @@
 
 namespace Motekar\LaravelZip\Support;
 
-use Motekar\LaravelZip\ZipBuilder;
+use Motekar\LaravelZip\ZipManager;
 
-function zip(): ZipBuilder
+function zip(): ZipManager
 {
-    return app(ZipBuilder::class);
+    return app(ZipManager::class);
 }

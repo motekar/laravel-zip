@@ -3,15 +3,15 @@
 namespace Motekar\LaravelZip\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Motekar\LaravelZip\ZipBuilder;
+use Motekar\LaravelZip\ZipManager;
 
 /**
- * @mixin \Motekar\LaravelZip\ZipBuilder
+ * @mixin \Motekar\LaravelZip\ZipManager
  */
 class Zip extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return ZipBuilder::class;
+        return ZipManager::class;
     }
 }

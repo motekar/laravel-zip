@@ -1,214 +1,171 @@
-# Note
+# Laravel Zip - Create and Manage Zip Archives in Laravel
 
-I haven't updated this package in a long time except merging PRs. The last time I was using this package was with PHP5.
-I archived the repository for the reason that I am no longer working with PHP (we all have to move on sometimes) and have no time to take proper care of it anymore.
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/motekar/laravel-zip.svg?style=flat-square)](https://packagist.org/packages/motekar/laravel-zip)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/motekar/laravel-zip/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/motekar/laravel-zip/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/motekar/laravel-zip/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/motekar/laravel-zip/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/motekar/laravel-zip.svg?style=flat-square)](https://packagist.org/packages/motekar/laravel-zip)
 
-Feel free to read the code, to fork it or to use it in whatever way you want.
+This package provides a simple and intuitive way to create and manage Zip archives in Laravel applications. It wraps PHP's ZipArchive class with additional convenience methods and fluent syntax.
 
-## Update 25th February 2020
+## Quick Example
 
-I have merged a PR that includes a security fixe to mitigate zip directory traversal attacks. \
-**This package is still archived and should be swapped out with another package.** \
-However, as long as security fixes will come in I see it as my basic obligation to update this package on demand.
+```php
+use Motekar\LaravelZip\Facades\Zip;
 
-# Zipper
+Zip::make(storage_path('images.zip'))
+    ->add(glob(storage_path('images/*')))
+    ->close();
+```
 
-[![Build Status](https://travis-ci.org/motekar/laravel-zipper.png)](https://travis-ci.org/motekar/laravel-zipper)
-
-This is a simple Wrapper around the ZipArchive methods with some handy functions.
+This code creates a zip file named `images.zip` in the storage directory, containing all files from the `storage/images/` folder.
 
 ## Installation
 
-1. Add this package to the list of required packages, inside `composer.json`
-  * `"motekar/zipper": "1.0.x"`
+Install the package via Composer:
 
-2. Run `composer update`
-
-You can now access Zipper with the `Zipper` alias.
-
-## Simple example
-```php
-$files = glob('public/files/*');
-Zipper::make('public/test.zip')->add($files)->close();
-```
-- by default the package will create the `test.zip` in the project route folder but in the example above we changed it to `project_route/public/`.
-
-## Another example
-```php
-$zipper = new \Motekar\Zipper\Zipper;
-
-$zipper->make('test.zip')->folder('test')->add('composer.json');
-$zipper->zip('test.zip')->folder('test')->add('composer.json','test');
-
-$zipper->remove('composer.lock');
-
-$zipper->folder('mySuperPackage')->add(
-    array(
-        'vendor',
-        'composer.json'
-    ),
-);
-
-$zipper->getFileContent('mySuperPackage/composer.json');
-
-$zipper->make('test.zip')->extractTo('',array('mySuperPackage/composer.json'),Zipper::WHITELIST);
-
-$zipper->close();
+```bash
+composer require motekar/laravel-zip
 ```
 
-Note: Please be aware that you need to call `->close()` at the end to write the zip file to disk.
-
-You can easily chain most functions, except `getFileContent`, `getStatus`, `close` and `extractTo` which must come at the end of the chain.
-
-The main reason I wrote this little package is the `extractTo` method since it allows you to be very flexible when extracting zips. So you can for example implement an update method which will just override the changed files.
-
-
-# Functions
-
-## make($pathToFile)
-
-`Create` or `Open` a zip archive; if the file does not exists it will create a new one.
-It will return the Zipper instance so you can chain easily.
-
-
-## add($files/folder)
-
-You can add an array of Files, or a Folder and all the files in that folder will then be added, so from the first example we could instead do something like `$files = 'public/files/';`.
-
-
-## addString($filename, $content)
-
-add a single file to the zip by specifying a name and the content as strings.
-
-
-## remove($file/s)
-
-removes a single file or an array of files from the zip.
-
-
-## folder($folder)
-
-Specify a folder to 'add files to' or 'remove files from' from the zip, example
+## Usage
 
 ```php
-Zipper::make('test.zip')->folder('test')->add('composer.json');
-Zipper::make('test.zip')->folder('test')->remove('composer.json');
+use Motekar\LaravelZip\Facades\Zip;
+
+// Create a zip file and add files
+$zip = Zip::make('test.zip')
+    ->folder('test')
+    ->add('composer.json');
+
+// Add a file with a specific name
+$zip = Zip::make('test.zip')
+    ->folder('test')
+    ->add('composer.json', 'test');
+
+// Remove a file from the archive
+$zip->remove('composer.lock');
+
+// Add multiple files to a specific folder
+$zip->folder('mySuperPackage')->add([
+    'vendor',
+    'composer.json'
+]);
+
+// Get file content from the archive
+$content = $zip->getFileContent('mySuperPackage/composer.json');
+
+// Extract specific files using whitelist
+$zip->make('test.zip')
+    ->extractTo('', ['mySuperPackage/composer.json'], Zipper::WHITELIST)
+    ->close();
 ```
 
-## listFiles($regexFilter = null)
+**Important Notes:**
+1. Always call `->close()` at the end to write changes to disk
+2. Most methods are chainable except:
+   - `getFileContent`
+   - `getStatus`
+   - `close`
+   - `extractTo`
 
-Lists all files within archive (if no filter pattern is provided). Use `$regexFilter` parameter to filter files. See [Pattern Syntax](http://php.net/manual/en/reference.pcre.pattern.syntax.php) for regular expression syntax
+## API Reference
 
-> NB: `listFiles` ignores folder set with `folder` function
+### make($pathToFile)
+Creates or opens a zip archive. If the file doesn't exist, it creates a new one. Returns the Zipper instance for method chaining.
 
+### add($filesOrFolder)
+Adds files or folders to the archive. Accepts:
+- An array of file paths
+- A single folder path (all files in the folder will be added)
 
-Example: Return all files/folders ending/not ending with '.log' pattern (case insensitive). This will return matches in sub folders and their sub folders also
+### addString($filename, $content)
+Adds a file to the archive using string content.
 
+### remove($files)
+Removes files from the archive. Accepts:
+- A single file path
+- An array of file paths
+
+### folder($folder)
+Sets the working folder for subsequent operations.
+
+### listFiles($regexFilter = null)
+Lists files in the archive. Optionally filters files using a regex pattern.
+
+**Note:** Ignores the folder set with `folder()`
+
+**Examples:**
 ```php
-$logFiles = Zipper::make('test.zip')->listFiles('/\.log$/i');
-$notLogFiles = Zipper::make('test.zip')->listFiles('/^(?!.*\.log).*$/i');
+// Get all .log files
+$logFiles = Zip::make('test.zip')->listFiles('/\.log$/i');
+
+// Get all non-.log files
+$notLogFiles = Zip::make('test.zip')->listFiles('/^(?!.*\.log).*$/i');
 ```
 
+### home()
+Resets the folder pointer to the root.
 
-## home()
+### getFileContent($filePath)
+Returns the content of a file from the archive or false if not found.
 
-Resets the folder pointer.
+### getStatus()
+Returns the opening status of the zip archive as an integer.
 
-## zip($fileName)
+### close()
+Writes all changes and closes the archive.
 
-Uses the ZipRepository for file handling.
+### extractTo($path, $files = [], $flags = 0)
+Extracts archive contents to the specified path. Supports:
+- **Zipper::WHITELIST**: Extract only specified files
+- **Zipper::BLACKLIST**: Extract all except specified files
+- **Zipper::EXACT_MATCH**: Match file names exactly
 
-
-## getFileContent($filePath)
-
-get the content of a file in the zip. This will return the content or false.
-
-
-## getStatus()
-
-get the opening status of the zip as integer.
-
-
-## close()
-
-closes the zip and writes all changes.
-
-
-## extractTo($path)
-
-Extracts the content of the zip archive to the specified location, for example
-
+**Examples:**
 ```php
-Zipper::make('test.zip')->folder('test')->extractTo('foo');
-```
+use Motekar\LaravelZip\Facades\Zip;
+use Motekar\LaravelZip\ZipManager;
 
-This will go into the folder `test` in the zip file and extract the content of that folder only to the folder `foo`, this is equal to using the `Zipper::WHITELIST`.
+// Whitelist example
+Zip::make('test.zip')
+    ->extractTo('public', ['vendor'], ZipManager::WHITELIST);
 
-This command is really nice to get just a part of the zip file, you can also pass a 2nd & 3rd param to specify a single or an array of files that will be
+// Blacklist example
+Zip::make('test.zip')
+    ->extractTo('public', ['vendor'], ZipManager::BLACKLIST);
 
-> NB: Php ZipArchive uses internally '/' as directory separator for files/folders in zip. So Windows users should not set
-> whitelist/blacklist patterns with '\' as it will not match anything
-
-white listed
-
->**Zipper::WHITELIST**
-
-```php
-Zipper::make('test.zip')->extractTo('public', array('vendor'), Zipper::WHITELIST);
-```
-
-Which will extract the `test.zip` into the `public` folder but **only** files/folders starting with `vendor` prefix inside the zip will be extracted.
-
-or black listed
-
->**Zipper::BLACKLIST**
-Which will extract the `test.zip` into the `public` folder except files/folders starting with `vendor` prefix inside the zip will not be extracted.
-
-
-```php
-Zipper::make('test.zip')->extractTo('public', array('vendor'), Zipper::BLACKLIST);
-```
-
->**Zipper::EXACT_MATCH**
-
-```php
-Zipper::make('test.zip')
+// Exact match example
+Zip::make('test.zip')
     ->folder('vendor')
-    ->extractTo('public', array('composer', 'bin/phpunit'), Zipper::WHITELIST | Zipper::EXACT_MATCH);
+    ->extractTo('public', ['composer', 'bin/phpunit'], ZipManager::WHITELIST | ZipManager::EXACT_MATCH);
 ```
 
-Which will extract the `test.zip` into the `public` folder but **only** files/folders **exact matching names**. So this will:
- * extract file or folder named `composer` in folder named `vendor` inside zip to `public` resulting `public/composer`
- * extract file or folder named `bin/phpunit` in `vendor/bin/phpunit` folder inside zip to `public` resulting `public/bin/phpunit`
+### extractMatchingRegex($path, $regex)
+Extracts files matching a regular expression pattern.
 
-> **NB:** extracting files/folder from zip without setting Zipper::EXACT_MATCH
-> When zip has similar structure as below and only `test.bat` is given as whitelist/blacklist argument then `extractTo` would extract all those files and folders as they all start with given string
-
-```
-test.zip
- |- test.bat
- |- test.bat.~
- |- test.bat.dir/
-    |- fileInSubFolder.log
-```
-
-## extractMatchingRegex($path, $regex)
-
-Extracts the content of the zip archive matching regular expression to the specified location. See [Pattern Syntax](http://php.net/manual/en/reference.pcre.pattern.syntax.php) for regular expression syntax.
-
-Example: extract all files ending with `.php` from `src` folder and its sub folders.
+**Examples:**
 ```php
-Zipper::make('test.zip')->folder('src')->extractMatchingRegex($path, '/\.php$/i');
+// Extract PHP files
+Zip::make('test.zip')
+    ->folder('src')
+    ->extractMatchingRegex($path, '/\.php$/i');
+
+// Exclude test files
+Zip::make('test.zip')
+    ->folder('src')
+    ->extractMatchingRegex($path, '/^(?!.*test\.php).*$/i');
 ```
 
-Example: extract all files **except** those ending with `test.php` from `src` folder and its sub folders.
-```php
-Zipper::make('test.zip')->folder('src')->extractMatchingRegex($path, '/^(?!.*test\.php).*$/i');
-```
+**Important Notes:**
+1. PHP's ZipArchive uses '/' as the directory separator
+2. Windows users should use '/' in patterns instead of '\'
 
-# Development
+## Credits
 
-Maybe it is a good idea to add other compression functions like rar, phar or bzip2 etc...
-Everything is setup for that, if you want just fork and develop further.
+- [Fauzie Rofi](https://github.com/fauzie811)
+- [Nils Plaschke](http://nilsplaschke.de)
+- [All Contributors](../../contributors)
 
-If you need other functions or got errors, please leave an issue on github.
+## License
+
+This package is open-source software licensed under the [Apache Version 2.0 license](LICENSE.md).

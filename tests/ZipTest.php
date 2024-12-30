@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\File;
 use Motekar\LaravelZip\Repositories\ZipRepository;
-use Motekar\LaravelZip\ZipBuilder;
+use Motekar\LaravelZip\ZipManager;
 
 use function Motekar\LaravelZip\Support\zip;
 
@@ -149,7 +149,7 @@ it('should extract whitelist files correctly', function () {
         ->save();
     $extractPath = getTempPath('extracted');
 
-    $zip->extractTo($extractPath, ['foo'], ZipBuilder::WHITELIST);
+    $zip->extractTo($extractPath, ['foo'], ZipManager::WHITELIST);
 
     expect(File::exists($extractPath . '/foo.txt'))->toBe(true)
         ->and(File::exists($extractPath . '/foo.log'))->toBe(true);
@@ -174,7 +174,7 @@ it('should throw exception when directory creation fails during extraction', fun
     File::partialMock()->shouldNotReceive('put')
         ->with(realpath('') . DIRECTORY_SEPARATOR . 'foo.log', 'foo.log');
 
-    expect(fn () => $zip->extractTo($extractPath, ['foo'], ZipBuilder::WHITELIST))
+    expect(fn () => $zip->extractTo($extractPath, ['foo'], ZipManager::WHITELIST))
         ->toThrow(RuntimeException::class, 'Failed to create folder');
 });
 
