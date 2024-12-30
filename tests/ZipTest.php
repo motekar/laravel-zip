@@ -11,7 +11,7 @@ beforeEach(function () {
     File::delete($this->targetPath);
 });
 
-test('make creates archive correctly', function () {
+it('should create archive correctly', function () {
     $zip = zip()->make($this->targetPath);
 
     expect($zip->getArchiveType())->toBe(ZipRepository::class)
@@ -20,7 +20,7 @@ test('make creates archive correctly', function () {
     $zip->close();
 });
 
-test('make throws exception when directory creation fails', function () {
+it('should throw exception when directory creation fails', function () {
     $path = getTempPath(time());
 
     File::partialMock()->shouldReceive('makeDirectory')
@@ -33,7 +33,7 @@ test('make throws exception when directory creation fails', function () {
         ->toThrow(RuntimeException::class, 'Failed to create folder');
 });
 
-test('add and get files work correctly', function () {
+it('should add and get files correctly', function () {
     $zip = zip()
         ->make($this->targetPath)
         ->add(getTestSupportPath('foo.txt'))
@@ -46,7 +46,7 @@ test('add and get files work correctly', function () {
     $zip->close();
 });
 
-test('add and get with array works correctly', function () {
+it('should add and get files with array correctly', function () {
     $zip = zip()
         ->make($this->targetPath)
         ->add([
@@ -61,7 +61,7 @@ test('add and get with array works correctly', function () {
     $zip->close();
 });
 
-test('add and get with custom filename array works correctly', function () {
+it('should add and get files with custom filename array correctly', function () {
     $zip = zip()
         ->make($this->targetPath)
         ->add([
@@ -76,7 +76,7 @@ test('add and get with custom filename array works correctly', function () {
     $zip->close();
 });
 
-test('add and get with sub folder works correctly', function () {
+it('should add and get files with sub folder correctly', function () {
     $zip = zip()
         ->make($this->targetPath)
         ->folder('foo')
@@ -90,7 +90,7 @@ test('add and get with sub folder works correctly', function () {
     $zip->close();
 });
 
-test('get file content throws exception for missing file', function () {
+it('should throw exception when getting content of missing file', function () {
     $zip = zip()
         ->make($this->targetPath)
         ->add(getTestSupportPath('bar.txt'))
@@ -102,7 +102,7 @@ test('get file content throws exception for missing file', function () {
     $zip->close();
 });
 
-test('remove works correctly', function () {
+it('should remove files correctly', function () {
     $zip = zip()
         ->make($this->targetPath)
         ->add([
@@ -139,7 +139,7 @@ test('remove works correctly', function () {
     $zip->close();
 });
 
-test('extract whitelist works correctly', function () {
+it('should extract whitelist files correctly', function () {
     $zip = zip()
         ->make($this->targetPath)
         ->add([
@@ -157,7 +157,7 @@ test('extract whitelist works correctly', function () {
     $zip->close();
 });
 
-test('extract to throws exception when directory creation fails', function () {
+it('should throw exception when directory creation fails during extraction', function () {
     $zip = zip()
         ->make($this->targetPath)
         ->add([
@@ -178,72 +178,88 @@ test('extract to throws exception when directory creation fails', function () {
         ->toThrow(RuntimeException::class, 'Failed to create folder');
 });
 
-// test('navigation folder and home works correctly', function () {
-//     $this->archive->folder('foo/bar');
-//     expect($this->archive->getCurrentFolderPath())->toBe('foo/bar');
+it('should navigate folders and return home correctly', function () {
+    $zip = zip()->make($this->targetPath);
 
-//     $this->file->shouldReceive('isFile')->with('foo')->andReturn(true);
-//     $this->archive->add('foo');
-//     expect($this->archive->getFileContent('foo/bar/foo'))->toBe('foo/bar/foo');
+    $zip->folder('foo/bar');
+    expect($zip->getCurrentFolderPath())->toBe('foo/bar');
 
-//     $this->file->shouldReceive('isFile')->with('bar')->andReturn(true);
-//     $this->archive->home()->add('bar');
-//     expect($this->archive->getFileContent('bar'))->toBe('bar');
+    $zip->add(getTestSupportPath('foo.txt'))->save();
+    expect($zip->getFileContent('foo/bar/foo.txt'))->toBe('foo');
 
-//     $this->file->shouldReceive('isFile')->with('baz/bar/bing')->andReturn(true);
-//     $this->archive->folder('test')->add('baz/bar/bing');
-//     expect($this->archive->getFileContent('test/bing'))->toBe('test/bing');
-// });
+    $zip->home()->add(getTestSupportPath('bar.txt'))->save();
+    expect($zip->getFileContent('bar.txt'))->toBe('bar');
 
-// test('list files works correctly', function () {
-//     // Empty file test
-//     $this->file->shouldReceive('isFile')->with('foo.file')->andReturn(true);
-//     $this->file->shouldReceive('isFile')->with('bar.file')->andReturn(true);
-//     expect($this->archive->listFiles())->toBeEmpty();
+    $zip->folder('test')->add(getTestSupportPath('foo/bar/foo.txt'))->save();
+    expect($zip->getFileContent('test/foo.txt'))->toBe('foo/bar/foo');
 
-//     // Non-empty file test
-//     $this->archive->add('foo.file');
-//     $this->archive->add('bar.file');
-//     expect($this->archive->listFiles())->toBe(['foo.file', 'bar.file']);
+    $zip->close();
+});
 
-//     // Empty subdir test
-//     $this->file->shouldReceive('isFile')->with('/path/to/subDirEmpty')->andReturn(false);
-//     $this->file->shouldReceive('files')->with('/path/to/subDirEmpty')->andReturn([]);
-//     $this->file->shouldReceive('directories')->with('/path/to/subDirEmpty')->andReturn([]);
-//     $this->archive->folder('subDirEmpty')->add('/path/to/subDirEmpty');
-//     expect($this->archive->listFiles())->toBe(['foo.file', 'bar.file']);
+it('should list files correctly', function () {
+    $zip = zip()->make($this->targetPath);
 
-//     // Non-empty subdir test
-//     $this->file->shouldReceive('isFile')->with('/path/to/subDir')->andReturn(false);
-//     $this->file->shouldReceive('isFile')->with('sub.file')->andReturn(true);
-//     $this->file->shouldReceive('files')->with('/path/to/subDir')->andReturn(['sub.file']);
-//     $this->file->shouldReceive('directories')->with('/path/to/subDir')->andReturn([]);
-//     $this->archive->folder('subDir')->add('/path/to/subDir');
-//     expect($this->archive->listFiles())->toBe(['foo.file', 'bar.file', 'subDir/sub.file']);
-// });
+    // Test empty archive
+    expect($zip->listFiles())->toBeEmpty();
 
-// test('list files with regex filter works correctly', function () {
-//     // Add root level files
-//     $this->file->shouldReceive('isFile')->with('foo.file')->andReturn(true);
-//     $this->file->shouldReceive('isFile')->with('bar.log')->andReturn(true);
-//     $this->archive->add('foo.file')->add('bar.log');
+    // Add files and test listing
+    $zip->add([
+        getTestSupportPath('foo.txt'),
+        getTestSupportPath('bar.txt'),
+    ])->save();
+    expect($zip->listFiles())->toBe(['foo.txt', 'bar.txt']);
 
-//     // Add subdir files
-//     $this->file->shouldReceive('isFile')->with('/path/to/subDir')->andReturn(false);
-//     $this->file->shouldReceive('isFile')->with('sub.file')->andReturn(true);
-//     $this->file->shouldReceive('isFile')->with('anotherSub.log')->andReturn(true);
-//     $this->file->shouldReceive('files')->with('/path/to/subDir')->andReturn(['sub.file', 'anotherSub.log']);
-//     $this->file->shouldReceive('directories')->with('/path/to/subDir')->andReturn([]);
-//     $this->archive->folder('subDir')->add('/path/to/subDir');
+    // Test empty subdirectory
+    if (! File::exists(getTestSupportPath('emptyDir'))) {
+        File::makeDirectory(getTestSupportPath('emptyDir'));
+    }
+    $zip->folder('emptyDir')->add(getTestSupportPath('emptyDir'))->save();
+    expect($zip->listFiles())->toBe(['foo.txt', 'bar.txt']);
 
-//     expect($this->archive->listFiles('/\.file$/i'))->toBe(['foo.file', 'subDir/sub.file']);
-// });
+    // Test non-empty subdirectory
+    $zip->folder('foo')->add(getTestSupportPath('foo'))->save();
+    expect($zip->listFiles())->toBe([
+        'foo.txt',
+        'bar.txt',
+        'foo/bar.txt',
+        'foo/foo.txt',
+        'foo/bar/foo.txt',
+    ]);
 
-// test('list files throws exception with invalid regex filter', function () {
-//     $this->file->shouldReceive('isFile')->with('foo.file')->andReturn(true);
-//     $this->archive->add('foo.file');
+    $zip->close();
+});
 
-//     $invalidPattern = 'asdasd';
-//     expect(fn () => $this->archive->listFiles($invalidPattern))
-//         ->toThrow(RuntimeException::class, 'regular expression match on \'foo.file\' failed with error. Please check if pattern is valid regular expression.');
-// });
+it('should list files with regex filter correctly', function () {
+    $zip = zip()->make($this->targetPath);
+
+    // Add root level files
+    $zip->add([
+        getTestSupportPath('foo.txt'),
+        getTestSupportPath('foo.log'),
+    ])->save();
+
+    // Add subdir files
+    $zip->folder('subDir')->add(getTestSupportPath('foo'))->save();
+
+    // Test regex filter for .txt files
+    expect($zip->listFiles('/\.txt$/i'))->toBe([
+        'foo.txt',
+        'subDir/bar.txt',
+        'subDir/foo.txt',
+        'subDir/bar/foo.txt',
+    ]);
+
+    $zip->close();
+});
+
+it('should throw exception when listing files with invalid regex filter', function () {
+    $zip = zip()->make($this->targetPath)
+        ->add(getTestSupportPath('foo.txt'))
+        ->save();
+
+    $invalidPattern = 'asdasd';
+    expect(fn () => $zip->listFiles($invalidPattern))
+        ->toThrow(RuntimeException::class, "regular expression match on 'foo.txt' failed with error. Please check if pattern is valid regular expression.");
+
+    $zip->close();
+});

@@ -34,7 +34,7 @@ class ZipBuilder
     /**
      * Handler to the archive
      */
-    private RepositoryInterface $repository;
+    private ?RepositoryInterface $repository = null;
 
     /**
      * The path to the current zip file
@@ -73,7 +73,11 @@ class ZipBuilder
                 $this->repository = $type;
             }
         } catch (Exception $e) {
-            throw $e;
+            throw new Exception(sprintf(
+                'Failed to initialize repository: %s. Error: %s',
+                is_string($objectOrName) ? $objectOrName : get_class($objectOrName),
+                $e->getMessage()
+            ), 0, $e);
         }
 
         $this->filePath = $filePath;
@@ -264,6 +268,7 @@ class ZipBuilder
     {
         if ($this->repository !== null) {
             $this->repository->close();
+            $this->repository = null;
         }
         $this->filePath = '';
     }
@@ -272,9 +277,10 @@ class ZipBuilder
      * Sets the internal folder to the given path.<br/>
      * Useful for extracting only a segment of a zip file.
      */
-    public function folder($path): static
+    public function folder(string $path): static
     {
-        $this->currentFolder = $path;
+        // Normalize path by removing trailing slashes
+        $this->currentFolder = rtrim($path, '/\\');
 
         return $this;
     }
@@ -426,6 +432,11 @@ class ZipBuilder
 
         // Now let's visit the subdirectories and add them, too.
         foreach (File::directories($pathToDir) as $dir) {
+            // Skip symbolic links to prevent infinite recursion
+            if (is_link($dir)) {
+                continue;
+            }
+
             $old_folder = $this->currentFolder;
             $this->currentFolder = empty($this->currentFolder) ? basename($dir) : $this->currentFolder . '/' . basename($dir);
             $this->addDir($pathToDir . '/' . basename($dir));
@@ -473,19 +484,49 @@ class ZipBuilder
     }
 
     /**
+     * Normalizes a path similar to realpath but works for non-existent paths
+     *
+     * @param  string  $path  The path to normalize
+     * @return string The normalized absolute path
+     */
+    private function normalizePath(string $path): string
+    {
+        // Convert to absolute path
+        $path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
+        $parts = explode(DIRECTORY_SEPARATOR, $path);
+        $absolutes = [];
+
+        foreach ($parts as $part) {
+            if ($part === '.') {
+                continue;
+            }
+            if ($part === '..') {
+                array_pop($absolutes);
+            } else {
+                $absolutes[] = $part;
+            }
+        }
+
+        return implode(DIRECTORY_SEPARATOR, $absolutes);
+    }
+
+    /**
      * @throws \RuntimeException
      */
     private function extractOneFileInternal(string $fileName, string $path)
     {
         $tmpPath = str_replace($this->getInternalPath(), '', $fileName);
 
-        //Prevent Zip traversal attacks
-        if (strpos($fileName, '../') !== false || strpos($fileName, '..\\') !== false) {
-            throw new \RuntimeException('Special characters found within filenames');
+        // Prevent Zip traversal attacks
+        $normalizedPath = $this->normalizePath($path);
+        $targetPath = $this->normalizePath($path . DIRECTORY_SEPARATOR . $tmpPath);
+
+        if (strpos($targetPath, $normalizedPath) !== 0) {
+            throw new \RuntimeException('Invalid path detected - possible path traversal attempt');
         }
 
         // We need to create the directory first in case it doesn't exist
-        $dir = pathinfo($path . DIRECTORY_SEPARATOR . $tmpPath, PATHINFO_DIRNAME);
+        $dir = pathinfo($targetPath, PATHINFO_DIRNAME);
         if (! File::exists($dir) && ! File::makeDirectory($dir, 0755, true, true)) {
             throw new \RuntimeException('Failed to create folders');
         }
