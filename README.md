@@ -31,6 +31,7 @@ composer require motekar/laravel-zip
 
 ```php
 use Motekar\LaravelZip\Facades\Zip;
+use Motekar\LaravelZip\ZipManager;
 
 // Create a zip file and add files
 $zip = Zip::make('test.zip')
@@ -56,7 +57,7 @@ $content = $zip->getFileContent('mySuperPackage/composer.json');
 
 // Extract specific files using whitelist
 $zip->make('test.zip')
-    ->extractTo('', ['mySuperPackage/composer.json'], Zipper::WHITELIST)
+    ->extractTo('', ['mySuperPackage/composer.json'], ZipManager::WHITELIST)
     ->close();
 ```
 
@@ -71,7 +72,7 @@ $zip->make('test.zip')
 ## API Reference
 
 ### make($pathToFile)
-Creates or opens a zip archive. If the file doesn't exist, it creates a new one. Returns the Zipper instance for method chaining.
+Creates or opens a zip archive. If the file doesn't exist, it creates a new one. Returns the ZipManager instance for method chaining.
 
 ### add($filesOrFolder)
 Adds files or folders to the archive. Accepts:
@@ -117,9 +118,9 @@ Writes all changes and closes the archive.
 
 ### extractTo($path, $files = [], $flags = 0)
 Extracts archive contents to the specified path. Supports:
-- **Zipper::WHITELIST**: Extract only specified files
-- **Zipper::BLACKLIST**: Extract all except specified files
-- **Zipper::EXACT_MATCH**: Match file names exactly
+- **ZipManager::WHITELIST**: Extract only specified files
+- **ZipManager::BLACKLIST**: Extract all except specified files
+- **ZipManager::EXACT_MATCH**: Match file names exactly
 
 **Examples:**
 ```php
