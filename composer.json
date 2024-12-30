@@ -1,7 +1,7 @@
 {
     "name": "motekar/laravel-zip",
     "type": "library",
-    "description": "This is a little neat helper for the ZipArchive methods with handy functions",
+    "description": "Create and Manage Zip Archives in Laravel",
     "keywords": [
         "laravel",
         "ZIP",
